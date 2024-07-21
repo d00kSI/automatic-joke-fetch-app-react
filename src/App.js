@@ -1,9 +1,10 @@
 // useState is used to remember the current state of an element
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function JokeContainer() {
   // State variables to hold the joke data, category, and error message
-  const [joke, setJOke] = useState('');
+  const [setup, setSetup] = useState('');
+  const [delivery, setDelivery] = useState('');
   const [category, setCategory] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -23,9 +24,15 @@ export default function JokeContainer() {
 
         // Handle different types of jokes
         if (data.type === 'single') {
-          setJoke(data.joke);
+          // Clear setup for single jokes
+          setSetup('');
+          // Set the joke and replace \n with <br>
+          setDelivery(data.joke.replace(/\n/g, '<br />'));
         } else {
-          setJoke(`${data.setup}<br>${data.delivery}`);
+          // Set the setup and replace \n with <br>
+          setSetup(data.setup.replace(/\n/g, '<br />'));
+          // Set the delivery and replace \n with <br />
+          setDelivery(data.delivery.replace(/\n/g, '<br />'));
         }
       })
       .catch(error => {
@@ -55,16 +62,28 @@ export default function JokeContainer() {
     }
   }
 
+  // useEffect to fetch a joke when the component mounts and set an interval
+  useEffect(() => {
+    // Fetch a joke on component mount
+    populateJoke();
+    // Set an interval to fetch a new joke every 30 seconds
+    const interval = setInterval(populateJoke, 30000);
+
+    // clean interval on componennt unmount
+    return () => clearInterval(interval); 
+  }, []);
+
   return (
     <section>
       <div className="joke-container" id="joke-container">
         <div className="title">Automatic Joke</div>
-        <div id="joke" className="joke"></div>
-        <div id="label" className="category"></div>
-        <p id="question" className="question"></p>
-        <p id="text"></p>
+        <div id="label" className="category" style={{ background: defineColor(category) }}>{category}</div>
+        <div id="joke" className="joke">
+          <p id="setup" className="setup" dangerouslySetInnerHTML={{ __html: setup }}></p>
+          <p id="delivery" className="delivery" dangerouslySetInnerHTML={{ __html: delivery }}></p>
+        </div>
       </div>
-      <div id="errorMessage" className="error"></div>
+      <div id="errorMessage" className="error">{errorMessage}</div>
     </section>
   );
 }
