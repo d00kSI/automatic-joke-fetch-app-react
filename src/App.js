@@ -34,9 +34,16 @@ export default function JokeContainer() {
           // Set the delivery and replace \n with <br />
           setDelivery(data.delivery.replace(/\n/g, '<br />'));
         }
+        
+        // Store the joke parameters in localStorage after setting the state
+        localStorage.setItem('setup', data.type === 'single' ? '' : data.setup.replace(/\n/g, '<br />'));
+        localStorage.setItem('delivery', data.type === 'single' ? data.joke.replace(/\n/g, '<br />') : data.delivery.replace(/\n/g, '<br />'));
+        localStorage.setItem('category', data.category);
       })
+      
+      // Catch any errors while fetching the joke
       .catch(error => {
-        setErrorMessage("No jokes were found!");
+        setErrorMessage(error.net);
         console.error(error);
       });
   }
@@ -64,8 +71,20 @@ export default function JokeContainer() {
 
   // useEffect to fetch a joke when the component mounts and set an interval
   useEffect(() => {
-    // Fetch a joke on component mount
-    populateJoke();
+    // Retrieve the joke from localStorage
+    const storedSetup = localStorage.getItem('setup');
+    const storedDelivery = localStorage.getItem('delivery');
+    const storedCategory = localStorage.getItem('category');
+
+    if (storedDelivery) {
+      setSetup(storedSetup);
+      setDelivery(storedDelivery);
+      setCategory(storedCategory);
+    } else {
+      // Fetch a joke if there is no stored one
+      populateJoke();
+    }
+    
     // Set an interval to fetch a new joke every 30 seconds
     const interval = setInterval(populateJoke, 30000);
 

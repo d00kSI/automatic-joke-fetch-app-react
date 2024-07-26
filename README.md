@@ -1,2 +1,2 @@
-# automatic-joke-fetcher-app-react
-Automatic joke fetching app remodelled with React
+# tic-tac-toe
+Created with CodeSandbox
